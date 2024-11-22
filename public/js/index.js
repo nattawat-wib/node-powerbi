@@ -11,11 +11,10 @@ powerbi.bootstrap(reportContainer, { type: "report" });
 
 // AJAX request to get the report details from the API and pass it to the UI
 $.ajax({
-    type: "GET",
+    type: "POST",
     url: "/getEmbedToken",
     dataType: "json",
     success: function (embedData) {
-
         // Create a config object with type of the object, Embed details and Token Type
         let reportLoadConfig = {
             type: "report",
@@ -99,4 +98,4 @@ $.ajax({
             errContainer.appendChild(errorContent);
         });
     }
-});
+})
