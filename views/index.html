@@ -21,8 +21,42 @@ Licensed under the MIT license. -->
             Power BI Embedded Sample
         </p>
     </header>
+
+    <div class=" d-flex justify-content-center align-items-end mt-4" style="gap: 10px;">
+        <select id="type">
+            <option value="reports"> report </option>
+            <option value="dashboards"> dashboard </option>
+            <option value="paginate"> paginate </option>
+        </select>
+        <div>
+            <label class="mb-0 d-block"> workspaceId </label>
+            <input id="workspaceId" name="workspaceId" />
+        </div>
+        <div>
+            <label class="mb-0 d-block"> sourceId </label>
+            <input id="sourceId" name="sourceId" />
+        </div>
+        <button id="embeddedButton"> embedded </button>
+    </div>
+
+    <div class="container text-center">
+        <table class="table my-4">
+            <thead>
+                <tr>
+                    <th> type </th>
+                    <th> workspace id </th>
+                    <th> source id </th>
+                    <th> time </th>
+                </tr>
+            </thead>
+            <tbody id="logTableBody">
+
+            </tbody>
+        </table>
+    </div>
+
     <main class="row">
-        <section id="text-container" class="embed-container col-lg-4 col-md-4 col-sm-4 mb-5 ml-5 mt-5">
+        <!-- <section id="text-container" class="embed-container col-lg-4 col-md-4 col-sm-4 mb-5 ml-5 mt-5">
             <div>
                 <p>This sample is developed using NodeJS Framework.
                     <br> In order to see a different report, make changes to the <i>config.json</i> file.
@@ -39,24 +73,26 @@ Licensed under the MIT license. -->
                     </ol>
                 </p>
             </div>
-        </section>
-        <section id="report-container" class="embed-container col-lg-offset-4 col-lg-7 col-md-offset-5 col-md-7 col-sm-offset-5 col-sm-7 mt-5">
+        </section> -->
+        <section id="report-container" style="height: 100vh" class="embed-container mt-5 w-100 h-100">
         </section>
 
         <!-- Used to display report embed error messages -->
         <section class="error-container m-5">
         </section>
     </main>
-    <footer class="embed-container col-lg-12 col-md-12 col-sm-12 mb-0 mt-4">
+
+    <!-- <footer class="embed-container col-lg-12 col-md-12 col-sm-12 mb-0 mt-4">
         <p class="text-center">
             For Live demo and more code samples please visit <a href="https://aka.ms/pbijs">https://aka.ms/pbijs</a>
             <br> For JavaScript API, please visit <a href="https://aka.ms/PowerBIjs">https://aka.ms/PowerBIjs</a>
         </p>
-    </footer>
+    </footer> -->
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/powerbi.min.js"></script>
     <script src="../public/js/index.js"></script>
+    <script src="/js/index.j"></script>
 
 </body>
 

@@ -43,7 +43,7 @@ async function getEmbedInfo(body) {
  * @param {string} reportId
  * @param {string} additionalDatasetId - Optional Parameter
  * @return EmbedConfig object
- */
+ */ 
 async function getEmbedParamsForSingleReport(workspaceId, sourceId, sourceType, additionalDatasetId) {
     
     let reportInGroupApi;
@@ -51,7 +51,7 @@ async function getEmbedParamsForSingleReport(workspaceId, sourceId, sourceType, 
     switch (sourceType) {
         case "reports": reportInGroupApi = `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/reports/${sourceId}`; break;
         case "dashboards": reportInGroupApi = `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/dashboards/${sourceId}`; break;
-        // case "dashboards": reportInGroupApi = `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/dashboards`; break;
+        case "paginates": reportInGroupApi = `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/dashboards/${sourceId}`; break;
     
         default: break;
     }
@@ -155,6 +155,10 @@ async function getEmbedParamsForSingleReport(workspaceId, sourceId, sourceType, 
  * @return EmbedToken
  */
 async function getEmbedTokenForSingleReportSingleWorkspace(sourceId, datasetIds, targetWorkspaceId, sourceType) {
+    // console.log("sourceId", sourceId);
+    // console.log("datasetIds", datasetIds);
+    // console.log("targetWorkspaceId", targetWorkspaceId);
+    // console.log("sourceType", sourceType);
 
     // Add report id in the request
     let formData = {
@@ -187,6 +191,7 @@ async function getEmbedTokenForSingleReportSingleWorkspace(sourceId, datasetIds,
     switch (sourceType) {
         case "reports": embedTokenApi = "https://api.powerbi.com/v1.0/myorg/GenerateToken"; break;
         case "dashboards": embedTokenApi = `https://api.powerbi.com/v1.0/myorg/groups/${targetWorkspaceId}/dashboards/${sourceId}/GenerateToken`; break;
+        case "paginates": embedTokenApi = `https://api.powerbi.com/v1.0/myorg/groups/${targetWorkspaceId}/dashboards/${sourceId}/GenerateToken`; break;
         default: break;
     }
 
