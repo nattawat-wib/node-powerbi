@@ -11,7 +11,6 @@ $("#embeddedButton").click(() => {
     const workspaceId = $("#workspaceId").val();
 
     const embeddedHistoryList = JSON.parse(localStorage.getItem("embeddedHistoryList") || "[]");
-    console.log('embeddedHistoryList 1', embeddedHistoryList);
 
     embeddedHistoryList.push(JSON.stringify({
         timestamp: Date.now(),
@@ -50,14 +49,14 @@ const printLogTable = (logList = []) => {
                 <td> ${new Date(log.timestamp).toLocaleString("en-gb").split(", ").join(" ")} </td>
                 <td>
                     <button 
-                        class="btn btn-info embed-log-btn"
+                        class="btn btn-outline-info embed-log-btn"
                         data-log='${JSON.stringify(log)}'
                     > 
-                        embed
+                        re-embed
                         <i class="fa-solid fa-moon"></i>
                     </button>
                     <button 
-                        class="btn btn-danger delete-log-btn" 
+                        class="btn btn-outline-danger delete-log-btn" 
                         data-timestamp="${log.timestamp}"
                     > 
                         x 
@@ -93,29 +92,39 @@ $(document).on("click", ".delete-log-btn", function() {
 
 printLogTable(JSON.parse(localStorage.getItem("embeddedHistoryList") || "[]"))
 
-let models = window["powerbi-client"].models;
-let reportContainer = $("#report-container").get(0);
-
-// Initialize iframe for embedding report
-powerbi.bootstrap(reportContainer, { type: "dashboard" });
+let container;
+let report;
 
 const callGenEmbedToken = (form) => {
+    $("#loader").removeClass("d-none")
+    let models = window["powerbi-client"].models;
+    let reportContainer = $("#report-container").get(0);
+    const embedType = form.type.substring(0, form.type.length - 1)
+    
+    // Initialize iframe for embedding report
+    if(container) { 
+        container.config.type = embedType
+    } else {
+        container = powerbi.bootstrap(reportContainer, { type: embedType });
+    }
+
     // AJAX request to get the report details from the API and pass it to the UI
-    console.log("form", form)
     $.ajax({
         type: "POST",
         url: "/getEmbedToken",
         dataType: "json",
         data: form,
         success: function (embedData) {
+            console.log('embedData', embedData);
             // Create a config object with type of the object, Embed details and Token Type
             let reportLoadConfig = {
-                type: "dashboard",
+                type: embedType,
                 tokenType: models.TokenType.Embed,
                 accessToken: embedData.accessToken,
 
                 // Use other embed report config based on the requirement. We have used the first one for demo purpose
                 embedUrl: embedData.embedUrl[0].embedUrl,
+                id: embedData.embedUrl[0].reportId,
 
                 // Enable this setting to remove gray shoulders from embedded report
                 // settings: {
@@ -128,13 +137,40 @@ const callGenEmbedToken = (form) => {
             tokenExpiry = embedData.expiry;
 
             // Embed Power BI report when Access token and Embed URL are available
-            let report = powerbi.embed(reportContainer, reportLoadConfig);
+            // let report = powerbi.embed(reportContainer, reportLoadConfig);
+
+            // oldReport = powerbi.get(reportContainer)
+
+            // console.log('report', report);
+
+            // console.log('oldReport', oldReport);
+            if(report) {
+                if(typeof report.destroy === 'function') {
+                    report?.destroy()
+                }
+                console.log(report);
+                // report.config.type = embedType
+                // report.bookmarksManager.config.type = embedType
+                // report.embedtype = embedType
+                // report.loadPath = `/${embedType}/load`
+                // report.phasedLoadPath = `/${embedType}/prepare`
+            } else {
+                // report = powerbi.embed(reportContainer, reportLoadConfig);
+            }
+
+            console.log('reportLoadConfig', reportLoadConfig);
+            console.log('report', report);
+            report = powerbi.embed(reportContainer, reportLoadConfig);
 
             // Clear any other loaded handler events
-            report.off("loaded");
+            // report.off("loaded");
+            report.off("loaded", function () {
+                console.log("Report off loading");
+            });
 
             // Triggers when a report schema is successfully loaded
-            report.on("loaded", function () {
+            report.on("loaded", function (a, b) {
+                // console.log('a, b', a, b);
                 console.log("Report load successful");
             });
 
@@ -190,5 +226,9 @@ const callGenEmbedToken = (form) => {
                 errContainer.appendChild(errorContent);
             });
         },
+        
+        complete: function() {
+            $("#loader").addClass("d-none");
+        }
     });
 };
