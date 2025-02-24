@@ -9,6 +9,7 @@ $("#embeddedButton").click(() => {
     const type = $("#type").val();
     const sourceId = $("#sourceId").val();
     const workspaceId = $("#workspaceId").val();
+    const name = $("#name").val();
 
     const embeddedHistoryList = JSON.parse(localStorage.getItem("embeddedHistoryList") || "[]");
 
@@ -17,6 +18,7 @@ $("#embeddedButton").click(() => {
         type,
         workspaceId,
         sourceId,
+        name,
     }))
 
     localStorage.setItem("embeddedHistoryList", JSON.stringify(embeddedHistoryList));
@@ -29,9 +31,10 @@ $("#embeddedButton").click(() => {
         workspaceId,
     })
 
-    $("#type").val();
+    $("#type").val(null);
     $("#sourceId").val("");
     $("#workspaceId").val("");
+    $("#name").val("");
 });
 
 const printLogTable = (logList = []) => {
@@ -43,13 +46,9 @@ const printLogTable = (logList = []) => {
 
         $("#logTableBody").append(`
             <tr>
-                <td> ${log.type} </td>
-                <td> ${log.workspaceId} </td>
-                <td> ${log.sourceId} </td>
-                <td> ${new Date(log.timestamp).toLocaleString("en-gb").split(", ").join(" ")} </td>
                 <td>
                     <button 
-                        class="btn btn-outline-info embed-log-btn"
+                        class="btn btn-outline-info embed-log-btn text-nowrap mb-2"
                         data-log='${JSON.stringify(log)}'
                     > 
                         re-embed
@@ -59,15 +58,20 @@ const printLogTable = (logList = []) => {
                         class="btn btn-outline-danger delete-log-btn" 
                         data-timestamp="${log.timestamp}"
                     > 
-                        x 
+                        delete
                     </button>
                 </td>
+                <td> ${log.type} </td>
+                <td> ${log.name} </td>
+                <td> ${log.workspaceId} </td>
+                <td> ${log.sourceId} </td>
+                <td> ${new Date(log.timestamp).toLocaleString("en-gb").split(", ").join(" ")} </td>
             </tr>        
         `)
     })
 }
 
-$(document).on("click", ".embed-log-btn", function() {
+$(document).on("click", ".embed-log-btn", function () {
     const log = $(this).data("log")
 
     callGenEmbedToken({
@@ -77,7 +81,9 @@ $(document).on("click", ".embed-log-btn", function() {
     })
 })
 
-$(document).on("click", ".delete-log-btn", function() {
+$(document).on("click", ".delete-log-btn", function () {
+    if (!window.confirm("ยืนยันการลบหรือไม่ ?")) return
+
     const logList = JSON.parse(localStorage.getItem("embeddedHistoryList") || "[]");
     const timestamp = $(this).data("timestamp");
 
@@ -100,9 +106,9 @@ const callGenEmbedToken = (form) => {
     let models = window["powerbi-client"].models;
     let reportContainer = $("#report-container").get(0);
     const embedType = form.type.substring(0, form.type.length - 1)
-    
+
     // Initialize iframe for embedding report
-    if(container) { 
+    if (container) {
         container.config.type = embedType
     } else {
         container = powerbi.bootstrap(reportContainer, { type: embedType });
@@ -144,8 +150,8 @@ const callGenEmbedToken = (form) => {
             // console.log('report', report);
 
             // console.log('oldReport', oldReport);
-            if(report) {
-                if(typeof report.destroy === 'function') {
+            if (report) {
+                if (typeof report.destroy === 'function') {
                     report?.destroy()
                 }
                 console.log(report);
@@ -196,7 +202,7 @@ const callGenEmbedToken = (form) => {
         error: function (err) {
             // Show error container
             let errorContainer = $(".error-container");
-            $(".embed-container").hide();
+            // $(".embed-container").hide();
             errorContainer.show();
 
             // Get the error message from err object
@@ -226,8 +232,8 @@ const callGenEmbedToken = (form) => {
                 errContainer.appendChild(errorContent);
             });
         },
-        
-        complete: function() {
+
+        complete: function () {
             $("#loader").addClass("d-none");
         }
     });
