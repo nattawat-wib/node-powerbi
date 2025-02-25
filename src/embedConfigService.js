@@ -43,16 +43,18 @@ async function getEmbedInfo(body) {
  * @param {string} reportId
  * @param {string} additionalDatasetId - Optional Parameter
  * @return EmbedConfig object
- */ 
+ */
 async function getEmbedParamsForSingleReport(workspaceId, sourceId, sourceType, additionalDatasetId) {
-    
+
     let reportInGroupApi;
 
     switch (sourceType) {
-        case "reports": reportInGroupApi = `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/reports/${sourceId}`; break;
-        case "dashboards": reportInGroupApi = `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/dashboards/${sourceId}`; break;
-        case "paginates": reportInGroupApi = `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/dashboards/${sourceId}`; break;
-    
+        case "reports":
+        case "paginates":
+            reportInGroupApi = `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/reports/${sourceId}`; break;
+        case "dashboards":
+            reportInGroupApi = `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/dashboards/${sourceId}`; break;
+
         default: break;
     }
 
@@ -63,6 +65,8 @@ async function getEmbedParamsForSingleReport(workspaceId, sourceId, sourceType, 
         method: 'GET',
         headers: headers,
     })
+
+    // console.log('result EmbedParams', result);
 
     if (!result.ok) {
         throw result;
@@ -161,37 +165,52 @@ async function getEmbedTokenForSingleReportSingleWorkspace(sourceId, datasetIds,
     // console.log("sourceType", sourceType);
 
     // Add report id in the request
-    let formData = {
-        // 'reports': [{
-        [sourceType]: [{
-            'id': sourceId
-        }]
-    };
+    let formData;
 
     // Add dataset ids in the request
-    if (sourceType === "reports") {
-        formData['datasets'] = [];
-        for (const datasetId of datasetIds) {
-            formData['datasets'].push({
-                'id': datasetId
-            })
-        }
+    switch (sourceType) {
+        case "reports":
+
+            formData = {
+                // 'reports': [{
+                [sourceType]: [{
+                    'id': sourceId
+                }]
+            }
+
+            formData['datasets'] = [];
+            for (const datasetId of datasetIds) {
+                formData['datasets'].push({
+                    'id': datasetId
+                })
+            }
+            
+            break;
+            
+        case "paginates":
+            formData = { accessLevel: "View" };
+
+            break;
+
+        default:
+            break;
     }
 
     // Add targetWorkspace id in the request
-    if (targetWorkspaceId) {
-        formData['targetWorkspaces'] = [];
-        formData['targetWorkspaces'].push({
-            'id': targetWorkspaceId
-        })
-    }
+    // if (targetWorkspaceId) {
+    //     formData['targetWorkspaces'] = [];
+    //     formData['targetWorkspaces'].push({
+    //         'id': targetWorkspaceId
+    //     })
+    // }
 
     let embedTokenApi = "https://api.powerbi.com/v1.0/myorg/GenerateToken";
 
     switch (sourceType) {
-        case "reports": embedTokenApi = "https://api.powerbi.com/v1.0/myorg/GenerateToken"; break;
+        // case "reports": embedTokenApi = "https://api.powerbi.com/v1.0/myorg/GenerateToken"; break;
+        case "reports": embedTokenApi = `https://api.powerbi.com/v1.0/myorg/groups/${targetWorkspaceId}/reports/${sourceId}/GenerateToken`; break;
         case "dashboards": embedTokenApi = `https://api.powerbi.com/v1.0/myorg/groups/${targetWorkspaceId}/dashboards/${sourceId}/GenerateToken`; break;
-        case "paginates": embedTokenApi = `https://api.powerbi.com/v1.0/myorg/groups/${targetWorkspaceId}/dashboards/${sourceId}/GenerateToken`; break;
+        case "paginates": embedTokenApi = `https://api.powerbi.com/v1.0/myorg/groups/${targetWorkspaceId}/rdlreports/${sourceId}/GenerateToken`; break;
         default: break;
     }
 
@@ -203,6 +222,11 @@ async function getEmbedTokenForSingleReportSingleWorkspace(sourceId, datasetIds,
         headers: headers,
         body: JSON.stringify(formData)
     });
+
+    // console.log('embedTokenApi === ', embedTokenApi);
+    // console.log('headers === ', headers);
+    // console.log('formData === ', formData);
+    // console.log('result EmbedToken', result);
 
     if (!result.ok)
         throw result;

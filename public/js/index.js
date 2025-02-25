@@ -6,10 +6,10 @@
 // get value from html here
 
 $("#embeddedButton").click(() => {
-    const type = $("#type").val();
-    const sourceId = $("#sourceId").val();
-    const workspaceId = $("#workspaceId").val();
-    const name = $("#name").val();
+    const type = $("#type").val().trim();
+    const sourceId = $("#sourceId").val().trim();
+    const workspaceId = $("#workspaceId").val().trim();
+    const name = $("#name").val().trim();
 
     const embeddedHistoryList = JSON.parse(localStorage.getItem("embeddedHistoryList") || "[]");
 
@@ -105,13 +105,27 @@ const callGenEmbedToken = (form) => {
     $("#loader").removeClass("d-none")
     let models = window["powerbi-client"].models;
     let reportContainer = $("#report-container").get(0);
-    const embedType = form.type.substring(0, form.type.length - 1)
+    let configSourceType;
+    let payloadSourceType = form.type.substring(0, form.type.length - 1);
+
+    switch (form.type) {
+        case "reports": 
+        case "paginates": 
+            configSourceType = "report" 
+            break;
+
+        case "dashboards": 
+            configSourceType = "dashboard" 
+            break;
+    
+        default: break;
+    }
 
     // Initialize iframe for embedding report
     if (container) {
-        container.config.type = embedType
+        container.config.type = configSourceType
     } else {
-        container = powerbi.bootstrap(reportContainer, { type: embedType });
+        container = powerbi.bootstrap(reportContainer, { type: configSourceType });
     }
 
     // AJAX request to get the report details from the API and pass it to the UI
@@ -124,7 +138,7 @@ const callGenEmbedToken = (form) => {
             console.log('embedData', embedData);
             // Create a config object with type of the object, Embed details and Token Type
             let reportLoadConfig = {
-                type: embedType,
+                type: payloadSourceType,
                 tokenType: models.TokenType.Embed,
                 accessToken: embedData.accessToken,
 
